@@ -1,58 +1,108 @@
-import fs from 'fs';
-import path from 'path';
+import axios from 'axios';
 
+const OWNER = 'SeptianXcz'; // Ganti dengan nama owner GitHub kamu
+const REPO = 'vdb'; // Ganti dengan nama repositori GitHub kamu
+const PATH = 'public/listusers.json'; // Path file JSON
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN; // GitHub token di environment variable
+
+// Fungsi untuk mendapatkan SHA file JSON
+async function getFileSha(path) {
+  const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
+  try {
+    const res = await axios.get(url, {
+      headers: { Authorization: `Bearer ${GITHUB_TOKEN}` }
+    });
+    return res.data.sha;
+  } catch {
+    return null;
+  }
+}
+
+// Fungsi untuk mendapatkan data file JSON saat ini
+async function getCurrentContent(path) {
+  const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
+  try {
+    const res = await axios.get(url, {
+      headers: { Authorization: `Bearer ${GITHUB_TOKEN}` }
+    });
+    const content = Buffer.from(res.data.content, 'base64').toString('utf-8');
+    return JSON.parse(content);
+  } catch {
+    return { users: [] }; // Default jika file tidak ada
+  }
+}
+
+// Fungsi untuk update file JSON di GitHub
+async function updateFile(content, sha, message) {
+  const updatedContent = Buffer.from(JSON.stringify(content, null, 2)).toString('base64');
+  await axios.put(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`, {
+    message,
+    content: updatedContent,
+    sha
+  }, {
+    headers: { Authorization: `Bearer ${GITHUB_TOKEN}` }
+  });
+}
+
+// Fungsi utama untuk menangani permintaan API
 export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
 
-  const { nama, nomor, mode } = req.body;
-  if (!nama || !nomor || !mode) return res.status(400).json({ error: 'Missing parameters' });
+  const { action, nama, nomor } = req.body;
 
-  const filePath = path.join(process.cwd(), 'listusers.json');
-
-  let data = { nomor: [] };
+  if (!action || !nama || !nomor) {
+    return res.status(400).json({ error: 'Data tidak lengkap' });
+  }
 
   try {
-    if (fs.existsSync(filePath)) {
-      const raw = fs.readFileSync(filePath, 'utf-8');
-      data = JSON.parse(raw);
-    }
+    // Ambil data file JSON dan SHA-nya
+    const { users, sha } = await getCurrentContent(PATH);
 
-    if (!data.nomor) data.nomor = [];
+    let updated = false;
 
-    if (mode === 'false') {
-      // Tambah user
-      const exists = data.nomor.some(item => item.nomor === nomor);
+    // Proses berdasarkan action yang diterima
+    if (action === 'add') {
+      // Tambah user jika belum ada
+      const exists = users.find(user => user.nomor === nomor);
       if (!exists) {
-        data.nomor.push({ nama, nomor, status: 'active' });
+        users.push({ nama, nomor, status: 'active' });
+        updated = true;
       }
-    } else if (mode === 'true') {
-      // Hapus user
-      data.nomor = data.nomor.filter(item => !(item.nama === nama && item.nomor === nomor));
-    } else if (mode === 'ban') {
-      let updated = false;
-      data.nomor = data.nomor.map(item => {
-        if (item.nomor === nomor) {
-          updated = true;
-          return { ...item, status: 'blacklist' };
-        }
-        return item;
-      });
-      if (!updated) {
-        data.nomor.push({ nama, nomor, status: 'blacklist' });
+    } else if (action === 'delete') {
+      // Hapus user berdasarkan nomor
+      const index = users.findIndex(user => user.nomor === nomor);
+      if (index !== -1) {
+        users.splice(index, 1);
+        updated = true;
       }
-    } else if (mode === 'unban') {
-      data.nomor = data.nomor.map(item => {
-        if (item.nomor === nomor && item.status === 'blacklist') {
-          return { ...item, status: 'active' };
-        }
-        return item;
-      });
-    } else {
-      return res.status(400).json({ error: 'Invalid mode' });
+    } else if (action === 'ban') {
+      // Update status user ke blacklist
+      const user = users.find(user => user.nomor === nomor);
+      if (user) {
+        user.status = 'blacklist';
+        updated = true;
+      } else {
+        users.push({ nama, nomor, status: 'blacklist' });
+        updated = true;
+      }
+    } else if (action === 'unban') {
+      // Update status user ke active
+      const user = users.find(user => user.nomor === nomor);
+      if (user && user.status === 'blacklist') {
+        user.status = 'active';
+        updated = true;
+      }
     }
 
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-    return res.status(200).json({ message: 'Berhasil diupdate' });
+    if (updated) {
+      // Update file di GitHub
+      await updateFile(users, sha, `Update user ${action}: ${nama}`);
+      return res.json({ success: true, message: `Berhasil ${action} user ${nama}` });
+    } else {
+      return res.status(400).json({ error: 'Data tidak berubah' });
+    }
 
   } catch (err) {
     console.error(err);
