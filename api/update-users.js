@@ -3,7 +3,7 @@ import axios from 'axios';
 const OWNER = 'SeptianXcz'; // Ganti dengan nama owner GitHub kamu
 const REPO = 'vdb'; // Ganti dengan nama repositori GitHub kamu
 const PATH = 'public/listusers.json'; // Path file JSON
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN; // GitHub token di environment variable
+const GITHUB_TOKEN = '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'; // Token GitHub kamu
 
 // Fungsi untuk mendapatkan SHA file JSON
 async function getFileSha(path) {
