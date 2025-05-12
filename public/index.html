@@ -9,34 +9,23 @@
   <h1>Daftar User Terdaftar</h1>
   <div id="user-data"></div>
 
-  <!-- Form untuk mengupdate user -->
-  <h3>Tambah/Hapus/Ban/Unban User</h3>
-  <form id="user-form">
-    <label>Nama: <input type="text" id="nama" required /></label><br>
-    <label>Nomor: <input type="text" id="nomor" required /></label><br>
-    <label>Action: 
-      <select id="action">
-        <option value="add">Tambah</option>
-        <option value="delete">Hapus</option>
-        <option value="ban">Ban</option>
-        <option value="unban">Unban</option>
-      </select>
-    </label><br>
-    <button type="submit">Update</button>
-  </form>
-
   <script>
+    function sensorNomor(nomor, jumlahKarakter = 4) {
+      return nomor.substring(0, jumlahKarakter) + '*'.repeat(nomor.length - jumlahKarakter);
+    }
+
     async function loadUserData() {
       try {
-        const res = await fetch('/api/update-users');
+        const res = await fetch('/public/listusers.json');
         const data = await res.json();
         const div = document.getElementById('user-data');
+
         data.forEach(user => {
           const el = document.createElement('div');
           el.className = 'user';
           el.innerHTML = `
             <strong>${user.nama}</strong><br>
-            Nomor: ${user.nomor}<br>
+            Nomor: ${sensorNomor(user.nomor)}<br>
             Status: <span class="${user.status}">${user.status}</span>
           `;
           div.appendChild(el);
@@ -45,30 +34,6 @@
         console.error('Gagal memuat data:', e);
       }
     }
-
-    // Mengirim data ke API untuk update user
-    document.getElementById('user-form').addEventListener('submit', async function (e) {
-      e.preventDefault();
-
-      const nama = document.getElementById('nama').value;
-      const nomor = document.getElementById('nomor').value;
-      const action = document.getElementById('action').value;
-
-      try {
-        const res = await fetch('/api/update-users', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ action, nama, nomor }),
-        });
-        const data = await res.json();
-        alert(data.message);
-        loadUserData(); // Reload data setelah update
-      } catch (error) {
-        console.error('Error:', error);
-      }
-    });
 
     loadUserData();
   </script>
