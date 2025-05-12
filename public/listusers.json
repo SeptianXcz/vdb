@@ -1,0 +1,12 @@
+[
+  {
+    "nama": "Septian",
+    "nomor": "6281234567890",
+    "status": "active"
+  },
+  {
+    "nama": "Eko",
+    "nomor": "6289876543210",
+    "status": "blacklist"
+  }
+]
