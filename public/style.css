@@ -1,0 +1,17 @@
+body {
+  font-family: Arial;
+  padding: 2rem;
+  background: #f4f4f4;
+}
+.user {
+  background: white;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+}
+.active {
+  color: green;
+}
+.blacklist {
+  color: red;
+}
