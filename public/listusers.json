@@ -3,5 +3,12 @@
     "nama": "Violet Ai",
     "nomor": "6281324217842",
     "status": "active"
+  },
+  {
+    "nama": "Dinata",
+    "nomor": [
+      "628978613993"
+    ],
+    "status": "active"
   }
 ]
