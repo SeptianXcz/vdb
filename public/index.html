@@ -2,38 +2,76 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Data User Bot</title>
   <link rel="stylesheet" href="/style.css" />
+  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-  <h1>Daftar User Terdaftar</h1>
+  <h1>Daftar Pengguna Terdaftar</h1>
+
+  <div class="search-box">
+    <i class="fas fa-search icon-search"></i>
+    <input type="text" id="search" placeholder="Cari nama pengguna..." />
+  </div>
+
   <div id="user-data"></div>
 
+  <footer>
+    &copy; 2025 Violet AI — All rights reserved.<br>
+    Developer: <a href="https://wa.me/628978613993" target="_blank">Hubungi via WhatsApp</a>
+  </footer>
+
   <script>
-    function sensorNomor(nomor, jumlahKarakter = 4) {
-      return nomor.substring(0, jumlahKarakter) + '*'.repeat(nomor.length - jumlahKarakter);
+    function sensorNomor(nomor) {
+      return nomor.replace(/^(\d{4})\d+(\d{3})$/, '$1****$2');
     }
+
+    let allUsers = [];
 
     async function loadUserData() {
       try {
         const res = await fetch('/listusers.json');
         const data = await res.json();
-        const div = document.getElementById('user-data');
-
-        data.forEach(user => {
-          const el = document.createElement('div');
-          el.className = 'user';
-          el.innerHTML = `
-            <strong>${user.nama}</strong><br>
-            Nomor: ${sensorNomor(user.nomor)}<br>
-            Status: <span class="${user.status}">${user.status}</span>
-          `;
-          div.appendChild(el);
-        });
+        allUsers = Array.isArray(data) ? data : [];
+        renderUserData(allUsers);
       } catch (e) {
         console.error('Gagal memuat data:', e);
+        document.getElementById('user-data').innerHTML = "<p>Gagal memuat data pengguna.</p>";
       }
     }
+
+    function renderUserData(users) {
+      const container = document.getElementById('user-data');
+      container.innerHTML = '';
+
+      if (!users.length) {
+        container.innerHTML = "<p>Tidak ada data pengguna.</p>";
+        return;
+      }
+
+      users.forEach(user => {
+        const userDiv = document.createElement('div');
+        userDiv.className = 'user';
+
+        const nomorList = Array.isArray(user.nomor)
+          ? user.nomor.map(n => `• ${sensorNomor(n)}`).join('<br>')
+          : `• ${sensorNomor(user.nomor)}`;
+
+        userDiv.innerHTML = `
+          <h2>${user.nama}</h2>
+          <p><strong>Nomor:</strong><br>${nomorList}</p>
+          <p><strong>Status:</strong> <span class="${user.status}">${user.status}</span></p>
+        `;
+        container.appendChild(userDiv);
+      });
+    }
+
+    document.getElementById('search').addEventListener('input', (e) => {
+      const keyword = e.target.value.toLowerCase();
+      const filtered = allUsers.filter(user => user.nama.toLowerCase().includes(keyword));
+      renderUserData(filtered);
+    });
 
     loadUserData();
   </script>
