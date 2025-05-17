@@ -23,8 +23,9 @@
   </footer>
 
   <script>
-    function sensorNomor(nomor) {
-      return nomor.replace(/^(\d{4})\d+(\d{3})$/, '$1****$2');
+    function sensorPassword(pw) {
+      if (!pw || pw.length < 4) return '****';
+      return pw.slice(0, 2) + '*'.repeat(pw.length - 4) + pw.slice(-2);
     }
 
     let allUsers = [];
@@ -54,13 +55,11 @@
         const userDiv = document.createElement('div');
         userDiv.className = 'user';
 
-        const nomorList = Array.isArray(user.nomor)
-          ? user.nomor.map(n => `• ${sensorNomor(n)}`).join('<br>')
-          : `• ${sensorNomor(user.nomor)}`;
+        const pwDisplay = user.password ? `• ${sensorPassword(user.password)}` : '• -';
 
         userDiv.innerHTML = `
           <h2>${user.nama}</h2>
-          <p><strong>Nomor:</strong><br>${nomorList}</p>
+          <p><strong>Password:</strong><br>${pwDisplay}</p>
           <p><strong>Status:</strong> <span class="${user.status}">${user.status}</span></p>
         `;
         container.appendChild(userDiv);
