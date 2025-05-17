@@ -1,8 +1,11 @@
 [
   {
-  "nama": "Karla",
-  "password": "karla",
-  "nomor": [""],
-  "status": "active"
+    "nama": "Karla",
+    "password": "karla",
+    "nomor": [
+      "",
+      "628978613993"
+    ],
+    "status": "active"
   }
 ]
