@@ -1,59 +1,8 @@
 [
   {
-    "nama": "Violet Ai",
-    "nomor": [
-      "6281324217842"
-    ],
-    "status": "active"
-  },
-  {
-    "nama": "Dinata",
-    "nomor": [
-      "628978613993"
-    ],
-    "status": "active"
-  },
-  {
-    "nama": "Kyy",
-    "nomor": [
-      "6281992850027"
-    ],
-    "status": "blacklist"
-  },
-  {
-    "nama": "Akame",
-    "nomor": [
-      "6289608888551",
-      "628978613443"
-    ],
-    "status": "blacklist"
-  },
-  {
-    "nama": "AkameAi",
-    "nomor": [
-      "6289888860551"
-    ],
-    "status": "blacklist"
-  },
-  {
-    "nama": "Joqwhy",
-    "nomor": [
-      "628978613449"
-    ],
-    "status": "blacklist"
-  },
-  {
-    "nama": "Mark Zuckerberg",
-    "nomor": [
-      "6289608888551"
-    ],
-    "status": "active"
-  },
-  {
-    "nama": "Asep",
-    "nomor": [
-      "628978613993"
-    ],
-    "status": "active"
+  "nama": "Karla",
+  "password": "karla",
+  "nomor": [""],
+  "status": "active"
   }
 ]
